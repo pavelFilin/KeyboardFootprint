@@ -23,7 +23,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .mvcMatchers("/", "/static/**").permitAll()
                 .anyRequest().authenticated()
-                .and();
+                .and()
+                .csrf().disable();
     }
 
     @Bean

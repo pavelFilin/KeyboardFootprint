@@ -25,9 +25,9 @@
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdownMenu">
                             <a class="dropdown-item" href="#">Dashboard</a>
                             <a class="dropdown-item" href="#">Edit Profile</a>
-                            <a class="dropdown-item" style="padding: 0">
+                            <a class="dropdown-item" href="/logout" style="padding: 0">
                                 <form action="/logout" method="post">
-                                    <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+<#--                                    <input type="hidden" name="_csrf" value="${_csrf.token}"/>-->
                                     <input class="dropdown-item" type="submit" value="Sign Out"/>
                                 </form>
                             </a>

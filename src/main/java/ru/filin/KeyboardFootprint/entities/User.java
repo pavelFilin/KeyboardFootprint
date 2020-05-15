@@ -2,10 +2,10 @@ package ru.filin.KeyboardFootprint.entities;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "usr")
@@ -19,4 +19,7 @@ public class User {
     private String gender;
     private String locale;
     private LocalDateTime lastVisit;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SimpleDate> authorisationAttempts = new ArrayList<>();
 }
