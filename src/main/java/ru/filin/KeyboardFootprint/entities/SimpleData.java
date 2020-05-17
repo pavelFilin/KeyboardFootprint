@@ -8,15 +8,15 @@ import java.util.List;
 
 @Data
 @Entity
-public class SimpleDate {
+public class SimpleData {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "simpleDate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "simpleData", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DataEntry> keysUp = new ArrayList<>();
 
-    @OneToMany(mappedBy = "simpleDate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "simpleData", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DataEntry> keysDown = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)

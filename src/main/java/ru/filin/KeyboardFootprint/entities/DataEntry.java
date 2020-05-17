@@ -14,6 +14,6 @@ public class DataEntry {
     private long date;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "simpleDate_id")
-    private SimpleDate simpleDate;
+    @JoinColumn(name = "simpleData_id")
+    private SimpleData simpleData;
 }

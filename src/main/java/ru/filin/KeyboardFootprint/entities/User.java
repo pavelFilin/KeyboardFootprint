@@ -21,5 +21,8 @@ public class User {
     private LocalDateTime lastVisit;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<SimpleDate> authorisationAttempts = new ArrayList<>();
+    private List<SimpleData> authorisationAttempts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AuthenticationResult> authenticationResults = new ArrayList<>();
 }
