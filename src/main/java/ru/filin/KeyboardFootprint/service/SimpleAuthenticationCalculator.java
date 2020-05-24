@@ -10,6 +10,7 @@ import java.util.List;
 @Service
 public class SimpleAuthenticationCalculator implements AuthenticationCalculator {
     private static final long MAX_PRESS_DELAY = 300;
+    private static final long LETTER_DELAY = 1500;
 
     private UserDetailsRepository userDetailsRepository;
     private DataEntryPreparator dataEntryPreparator;
@@ -25,23 +26,25 @@ public class SimpleAuthenticationCalculator implements AuthenticationCalculator 
         KeyPressStamp previousKeyPressStamp = calculateBaseKeyPressParameters(dataEntryPreparator.prepareDataEntry(authenticationAttempts));
         KeyPressStamp newKeyPressStamp = calculateBaseKeyPressParameters(dataEntryPreparator.prepareDataEntry(newAuthenticationAttempt));
 
-        KeyPressStamp difference = newKeyPressStamp.subtract(previousKeyPressStamp);
-
         AuthenticationResult result = new AuthenticationResult();
         result.setAuthenticationDate(new Date());
 
         result.setAllTime(newKeyPressStamp.getAllTime());
-        result.setAllTimeDifference(difference.getAllTime());
+        result.setAllTimeDifference(newKeyPressStamp.getAllTime() - previousKeyPressStamp.getAllTime() / authenticationAttempts.size());
 
         result.setAverageKeyDistance(newKeyPressStamp.getAverageKeyDistance());
-        result.setAverageKeyDistanceDifference(difference.getAverageKeyDistance());
+        result.setAverageKeyDistanceDifference(newKeyPressStamp.getAverageKeyDistance() - previousKeyPressStamp.getAverageKeyDistance());
 
         result.setAverageLetterDistance(newKeyPressStamp.getAverageLetterDistance());
-        result.setAverageLetterDistanceDifference(difference.getAverageLetterDistance());
+        result.setAverageLetterDistanceDifference(newKeyPressStamp.getAverageLetterDistance() - previousKeyPressStamp.getAverageLetterDistance());
 
-        user.getAuthenticationResults().add(result);
+        double deviationAllTime = getDeviation(result.getAllTime() + result.getAllTimeDifference(), result.getAllTime());
+        double deviationKeyDistance = getDeviation(result.getAverageKeyDistanceDifference() + result.getAverageKeyDistance(), result.getAverageKeyDistance());
+        double deviationLetterDistance = getDeviation(result.getAverageLetterDistanceDifference() + result.getAverageLetterDistance(), result.getAverageLetterDistance());
 
-        //todo calculate
+        double decision = deviationAllTime * 0.2 + deviationLetterDistance * 0.45 + 0.35 * deviationKeyDistance;
+
+        result.setScore(decision);
 
         return result;
     }
@@ -49,17 +52,42 @@ public class SimpleAuthenticationCalculator implements AuthenticationCalculator 
     private KeyPressStamp calculateBaseKeyPressParameters(List<DataEntry> dataEntries) {
         KeyPressStamp keyPressStamp = new KeyPressStamp();
 
-        for (int i = 0; i < dataEntries.size() - 2; i++) {
-            if (dataEntries.get(i).getDate() - dataEntries.get(i + 1).getDate() > MAX_PRESS_DELAY
-                    && dataEntries.get(i).getEventCode().compareTo(dataEntries.get(i + 1).getEventCode()) > 0) {
-                if (i % 2 == 0) {
-                    keyPressStamp.addKeyDistance(dataEntries.get(i).getDate() - dataEntries.get(i + 1).getDate());
-                } else {
-                    keyPressStamp.addLetterDistance(dataEntries.get(i).getDate() - dataEntries.get(i + 2).getDate());
-                }
+        for (int i = 0; i < dataEntries.size() - 1; i++) {
+            long difference = dataEntries.get(i + 1).getDate() - dataEntries.get(i).getDate();
+            if (dataEntries.get(i).getEventCode() == EventCode.KEYDOWN
+                    && dataEntries.get(i + 1).getEventCode() == EventCode.KEYUP
+                    && difference < MAX_PRESS_DELAY) {
+                keyPressStamp.addKeyDistance(difference);
+                calculateEdgeValues(keyPressStamp, difference);
+            } else if (dataEntries.get(i).getEventCode() == EventCode.KEYUP
+                    && dataEntries.get(i + 1).getEventCode() == EventCode.KEYDOWN
+                    && difference < LETTER_DELAY) {
+                keyPressStamp.addLetterDistance(difference);
+                calculateEdgeValues(keyPressStamp, difference);
             }
         }
 
         return keyPressStamp;
     }
+
+    private void calculateEdgeValues(KeyPressStamp keyPressStamp, long difference) {
+        if (keyPressStamp.getAverageMax() > difference) {
+            keyPressStamp.setAverageMax(difference);
+        }
+
+        if (keyPressStamp.getAverageMin() < difference) {
+            keyPressStamp.setAverageMin(difference);
+        }
+    }
+
+    private double getDeviation(double current, double average) {
+        if (current > average) {
+            return 2 - (current / average);
+        } else {
+            return 2 - (average / current);
+        }
+
+    }
+
+
 }

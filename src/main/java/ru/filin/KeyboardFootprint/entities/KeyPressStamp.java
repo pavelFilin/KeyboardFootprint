@@ -4,10 +4,15 @@ import lombok.Data;
 
 @Data
 public class KeyPressStamp {
-    long sumKeyDistance = 0;
-    int keyDistanceCount = 0;
-    long sumLetterDistance = 0;
-    int letterDistanceCount = 0;
+
+    private long sumKeyDistance = 0;
+    private long sumLetterDistance = 0;
+
+    private int letterDistanceCount = 0;
+    private int keyDistanceCount = 0;
+
+    private long averageMin;
+    private long averageMax;
 
     public void addKeyDistance(long time) {
         sumKeyDistance += time;
@@ -19,24 +24,12 @@ public class KeyPressStamp {
         letterDistanceCount++;
     }
 
-    public KeyPressStamp subtract(KeyPressStamp stamp) {
-        KeyPressStamp result = new KeyPressStamp();
-
-        result.setSumKeyDistance(sumKeyDistance - stamp.getSumKeyDistance());
-        result.setKeyDistanceCount(keyDistanceCount - stamp.getKeyDistanceCount());
-
-        result.setSumLetterDistance(letterDistanceCount - stamp.getLetterDistanceCount());
-        result.setSumLetterDistance(letterDistanceCount - stamp.getLetterDistanceCount());
-
-        return result;
-    }
-
     public long getAverageKeyDistance() {
         return sumKeyDistance/keyDistanceCount;
     }
 
     public long getAverageLetterDistance() {
-        return sumKeyDistance/keyDistanceCount;
+        return sumLetterDistance/keyDistanceCount;
     }
 
     public long getAllTime() {
